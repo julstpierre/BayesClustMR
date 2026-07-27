@@ -63,6 +63,8 @@ summary_stats <- all_results %>%
     rand = mean(rand)
   )
 
+summary_stats
+
 # -----------------------------
 # Plots
 # -----------------------------
@@ -81,7 +83,15 @@ method_colors <- setNames(tol12, method_levels)
 ## CLuster means density plot
 df_long <- all_results %>%
   select(theta_hat, method, scenario, N) %>%
-  unnest_longer(theta_hat)
+  unnest_longer(theta_hat) %>%
+  filter(theta_hat > -3, theta_hat < 3)
+
+group_by(df_long, method) %>%
+  summarise(
+    max = max(theta_hat),
+    min = min(theta_hat),
+    sd = sd(theta_hat)
+  )
 
 true_thetas <- c(-0.4, 0, 0.4, 0.8)
 
@@ -90,11 +100,14 @@ p <- ggplot(df_long, aes(x = theta_hat, fill = method, color = method)) +
   geom_vline(xintercept = true_thetas, linetype = "dashed", color = "black", linewidth = 0.4) +
   scale_fill_manual(values = method_colors) +
   scale_color_manual(values = method_colors) +
-  coord_cartesian(xlim = c(-1, 1.2)) +
+  facet_grid(N ~ ., scales = "free_y",
+             labeller = labeller(N = function(x) paste0("N = ", format(as.numeric(x), scientific = FALSE, big.mark = " ")))) + 
+  coord_cartesian(xlim = c(-0.8, 1.2)) +
   theme_minimal() +
   labs(x = expression(hat(theta)), y = "Density",
        title = expression("Density of " ~ hat(theta) ~ " by method"))
 
+print(p)
 ggsave(paste0(plot_dir, "theta_hat_density.pdf"), plot = p, width = 8, height = 6, units = "in")
 
 # -----------------------------

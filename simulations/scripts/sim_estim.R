@@ -22,6 +22,7 @@ args <- commandArgs(trailingOnly = TRUE)
 scenario <- args[1]               # e.g., "D_S1"
 start_idx     <- as.numeric(args[2])  # e.g., 1
 end_idx       <- as.numeric(args[3])  # e.g., 200
+prior <- ifelse(is.na(args[4]), "uniform", args[4])
 
 # -----------------------------
 # Load simulation data
@@ -42,14 +43,17 @@ tag_method <- function(res_list, method) {
 }
 
 res_all <- bind_rows(
-  tag_method(lapply(chunk, fit_BayesClustMR), "BayesClustMR"),
+  tag_method(lapply(chunk, fit_BayesClustMR, prior = prior), "BayesClustMR"),
   tag_method(lapply(chunk, fit_mr_clust), "mr_clust")
 )
 
 # -----------------------------
 # Save results
 # -----------------------------
-out_dir <- here::here("simulations", "results", "rds")
+out_dir <- here::here("simulations", "results", "rds", prior)
+if (!dir.exists(out_dir)) {
+  dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+}
 out_file <- paste0(scenario, "_chunk_", start_idx, "_to_", end_idx, ".rds")
 out_path <- file.path(out_dir, out_file)
 saveRDS(res_all, out_path)
