@@ -5,15 +5,15 @@
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
 #SBATCH --output=../results/logs/%x_%A_%a.out
-#SBATCH --array=0-239
+#SBATCH --array=0-599
 
 cd ~/projects/def-mlegault/gf591137/BayesClustMR/simulations/scripts/
 module load r/4.5.0
 
 SCENARIOS=("D_S1" "D_S2" "D_S3")
-PRIORS=("right_diffuse" "right_confident" "wrong_diffuse" "wrong_confident")
-N_CHUNKS=20
-CHUNK_SIZE=50
+PRIORS=("right_confident" "right_diffuse" "uniform" "wrong_diffuse" "wrong_confident")
+N_CHUNKS=40
+CHUNK_SIZE=25
 
 N_SCENARIOS=${#SCENARIOS[@]}
 N_PRIORS=${#PRIORS[@]}

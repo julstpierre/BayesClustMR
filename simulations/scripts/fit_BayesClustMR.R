@@ -49,7 +49,9 @@ fit_BayesClustMR <- function(sim, prior = "uniform") {
     tibble(
       theta_hat = list(sort(unique(res_bayes$res$cluster_mean[res_bayes$res$cluster_class != "Junk"]))),
       adj.rand = mclust::adjustedRandIndex(res_bayes$res$cluster, sim$cluster),
-      rand = fossil::rand.index(res_bayes$res$cluster, sim$cluster)
+      rand = fossil::rand.index(res_bayes$res$cluster, sim$cluster),
+      waic = res_bayes$waic,
+      mse = mean((res_bayes$results$cluster_mean - c(0, sim$theta)[sim$cluster + 1])^2, na.rm = TRUE)
     )
   )
   

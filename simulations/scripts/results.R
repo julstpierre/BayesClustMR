@@ -9,11 +9,13 @@ library(purrr)
 library(stringr)
 library(readr)
 library(ggplot2)
+library(clue)
 
 # -----------------------------
 # Parameters
 # -----------------------------
-results_dir <- "../results/rds/"
+prior <- c("right_confident", "right_diffuse", "uniform", "wrong_diffuse", "wrong_confident")[3]
+results_dir <- paste0("../results/rds/", prior)
 plot_dir <- "../results/plots/"
 scenario_prefix <- "D_S"
 
@@ -63,8 +65,6 @@ summary_stats <- all_results %>%
     rand = mean(rand)
   )
 
-summary_stats
-
 # -----------------------------
 # Plots
 # -----------------------------
@@ -83,8 +83,7 @@ method_colors <- setNames(tol12, method_levels)
 ## CLuster means density plot
 df_long <- all_results %>%
   select(theta_hat, method, scenario, N) %>%
-  unnest_longer(theta_hat) %>%
-  filter(theta_hat > -3, theta_hat < 3)
+  unnest_longer(theta_hat)
 
 group_by(df_long, method) %>%
   summarise(
@@ -95,7 +94,8 @@ group_by(df_long, method) %>%
 
 true_thetas <- c(-0.4, 0, 0.4, 0.8)
 
-p <- ggplot(df_long, aes(x = theta_hat, fill = method, color = method)) +
+p <- ggplot(filter(df_long, abs(theta_hat) < 3), 
+            aes(x = theta_hat, fill = method, color = method)) +
   geom_density(alpha = 0.4, adjust = 0.5) +   # smaller `adjust` = less smoothing, sharper peaks
   geom_vline(xintercept = true_thetas, linetype = "dashed", color = "black", linewidth = 0.4) +
   scale_fill_manual(values = method_colors) +
@@ -105,12 +105,7 @@ p <- ggplot(df_long, aes(x = theta_hat, fill = method, color = method)) +
   coord_cartesian(xlim = c(-0.8, 1.2)) +
   theme_minimal() +
   labs(x = expression(hat(theta)), y = "Density",
-       title = expression("Density of " ~ hat(theta) ~ " by method"))
+       title = bquote("Density of " ~ hat(theta) ~ " by method, " ~ .(prior) ~ "prior"))
 
 print(p)
 ggsave(paste0(plot_dir, "theta_hat_density.pdf"), plot = p, width = 8, height = 6, units = "in")
-
-# -----------------------------
-# Done
-# -----------------------------
-message("✅ Summary and plots saved in: ", results_dir, " and ", plot_dir)

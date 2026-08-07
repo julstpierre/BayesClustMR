@@ -20,7 +20,8 @@ fit_mr_clust <- function(sim){
     tibble(
       theta_hat = list(sort(unique(res_em_best$cluster_mean[res_em_best$cluster_class != "Junk"]))),
       adj.rand = mclust::adjustedRandIndex(res_em_best$cluster, sim$cluster),
-      rand = fossil::rand.index(res_em_best$cluster, sim$cluster)
+      rand = fossil::rand.index(res_em_best$cluster, sim$cluster),
+      mse = mean((res_em_best$cluster_mean - c(0, sim$theta)[sim$cluster + 1])^2, na.rm = TRUE)
     )
   )
 }
