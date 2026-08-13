@@ -1,7 +1,10 @@
 #--------------------------------------------------------------------------------
 # Fit MR_Clust on simulated data
 #--------------------------------------------------------------------------------
-fit_mr_clust <- function(sim){
+fit_mr_clust <- function(sim, prior){
+  
+  k <- if (prior == "none") NULL else sim$K
+  
   ratios <- as.vector(sim$by / sim$bx)
   ratios.se <- sim$byse / abs(sim$bx)
 
@@ -9,9 +12,9 @@ fit_mr_clust <- function(sim){
                         theta_se = ratios.se,
                         bx = sim$bx,
                         by = sim$by,
-                        bxse = sim$bxse,  # not returned by simulate_MR_data; unused by EM
+                        bxse = sim$bxse,
                         byse = sim$byse,
-                        k = sim$K
+                        k = k
   )
   
   res_em_best <- res_em$results$best

@@ -22,7 +22,7 @@ args <- commandArgs(trailingOnly = TRUE)
 scenario <- args[1]               # e.g., "D_S1"
 start_idx     <- as.numeric(args[2])  # e.g., 1
 end_idx       <- as.numeric(args[3])  # e.g., 200
-prior <- ifelse(is.na(args[4]), "uniform", args[4])
+prior <- args[4] # e.g., "none", "uniform", "right_diffuse", "right_confident", "wrong_diffuse", "wrong_confident"
 
 # -----------------------------
 # Load simulation data
@@ -44,7 +44,7 @@ tag_method <- function(res_list, method) {
 
 res_all <- bind_rows(
   tag_method(lapply(chunk, fit_BayesClustMR, prior = prior), "BayesClustMR"),
-  tag_method(lapply(chunk, fit_mr_clust), "mr_clust")
+  tag_method(lapply(chunk, fit_mr_clust, prior = prior), "mr_clust")
 )
 
 # -----------------------------
