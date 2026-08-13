@@ -14,8 +14,7 @@ library(clue)
 # -----------------------------
 # Parameters
 # -----------------------------
-prior <- c("right_confident", "right_diffuse", "uniform", "wrong_diffuse", "wrong_confident")[3]
-results_dir <- paste0("../results/rds/", prior)
+results_dir <- paste0("../results/rds/")
 plot_dir <- "../results/plots/"
 scenario_prefix <- "D_S"
 
@@ -30,28 +29,30 @@ scenario_metadata <- expand.grid(
   junk_clust = TRUE
 ) %>% mutate(scenario = paste0("S", row_number()))
 
-group_vars <- c("N", "method")
+group_vars <- c("N", "method", "prior")
 
 # -----------------------------
 # Load and process all results
 # -----------------------------
-all_files <- list.files(results_dir, pattern = paste0("^", scenario_prefix, ".*\\.rds$"), full.names = TRUE)
+all_files <- list.files(
+  results_dir,
+  pattern = paste0("^", scenario_prefix, ".*\\.rds$"),
+  full.names = TRUE,
+  recursive = TRUE
+)
 
 read_and_expand <- function(path) {
   df <- readRDS(path)
   df$source_file <- path
-  
-  # df <- df %>%
-  #   mutate(
-  #     across(c(Pvalue, Estimate, StdError, LCL, UCL),
-  #            ~ suppressWarnings(as.numeric(.)))
-  #   )
+  df$prior <- basename(dirname(path))
   
   return(df)
 }
 
 all_results <- map_dfr(all_files, read_and_expand) %>%
   mutate(scenario = str_extract(source_file, "S\\d+(_null)?")) %>%
+  mutate(prior = factor(prior, levels = c("right_confident", "right_diffuse", "uniform", 
+                                          "wrong_diffuse", "wrong_confident"))) %>% 
   left_join(scenario_metadata, by = "scenario") %>%
   select(-source_file)
 
@@ -62,7 +63,46 @@ summary_stats <- all_results %>%
   group_by(across(all_of(group_vars))) %>%
   summarise(
     adj.rand = mean(adj.rand),
-    rand = mean(rand)
+    rand = mean(rand),
+    mse = mean(mse),
+    waic = mean(waic)
+  )
+
+# Print table
+print(summary_stats, n = Inf)
+
+# Plot MSE values
+ggplot(all_results, aes(x = method, y = mse, fill = method)) +
+  geom_boxplot(outlier.size = 0.8, alpha = 0.8) +
+  facet_grid(N ~ prior) +
+  coord_cartesian(ylim = c(0, 0.4)) + 
+  labs(
+    x = "Method",
+    y = "MSE",
+    title = "MSE by method, sample size (N), and prior"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none",
+    strip.text = element_text(size = 8)
+  )
+
+# Plot WAIC values
+ggplot(filter(all_results, method == "BayesClustMR"), aes(x = method, y = waic, fill = method)) +
+  geom_boxplot(outlier.size = 0.8, alpha = 0.8) +
+  facet_grid(N ~ prior) +
+  labs(
+    x = "",
+    y = "WAIC",
+    title = "WAIC by sample size (N), and prior"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    legend.position = "none",
+    strip.text = element_text(size = 8)
   )
 
 # -----------------------------
@@ -81,8 +121,12 @@ tol12 <- c(
 method_colors <- setNames(tol12, method_levels)
 
 ## CLuster means density plot
+selected_prior <- c("right_confident", "right_diffuse", "uniform", 
+           "wrong_diffuse", "wrong_confident")[3]
+
 df_long <- all_results %>%
-  select(theta_hat, method, scenario, N) %>%
+  filter(prior == selected_prior) %>%
+  select(theta_hat, method, scenario, N, prior) %>%
   unnest_longer(theta_hat)
 
 group_by(df_long, method) %>%
@@ -105,7 +149,7 @@ p <- ggplot(filter(df_long, abs(theta_hat) < 3),
   coord_cartesian(xlim = c(-0.8, 1.2)) +
   theme_minimal() +
   labs(x = expression(hat(theta)), y = "Density",
-       title = bquote("Density of " ~ hat(theta) ~ " by method, " ~ .(prior) ~ "prior"))
+       title = bquote("Density of " ~ hat(theta) ~ " by method," ~ .(selected_prior) ~ "prior"))
 
 print(p)
 ggsave(paste0(plot_dir, "theta_hat_density.pdf"), plot = p, width = 8, height = 6, units = "in")
