@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+rm(list=ls())
 
 # -----------------------------
 # Load packages
@@ -51,7 +52,7 @@ read_and_expand <- function(path) {
 
 all_results <- map_dfr(all_files, read_and_expand) %>%
   mutate(scenario = str_extract(source_file, "S\\d+(_null)?")) %>%
-  mutate(prior = factor(prior, levels = c("right_confident", "right_diffuse", "uniform", 
+  mutate(prior = factor(prior, levels = c("none", "right_confident", "right_diffuse", "uniform", 
                                           "wrong_diffuse", "wrong_confident"))) %>% 
   left_join(scenario_metadata, by = "scenario") %>%
   select(-source_file)
@@ -62,6 +63,7 @@ all_results <- map_dfr(all_files, read_and_expand) %>%
 summary_stats <- all_results %>%
   group_by(across(all_of(group_vars))) %>%
   summarise(
+    nclust = mean(lengths(theta_hat)),
     adj.rand = mean(adj.rand),
     rand = mean(rand),
     mse = mean(mse),
@@ -70,6 +72,23 @@ summary_stats <- all_results %>%
 
 # Print table
 print(summary_stats, n = Inf)
+
+# Plot number of clusters
+ggplot(filter(all_results, prior == "none"), aes(x = method, y = lengths(theta_hat), fill = method)) +
+  geom_boxplot(outlier.size = 0.8, alpha = 0.8) +
+  facet_grid(. ~ N) +
+  # coord_cartesian(ylim = c(0, 0.4)) + 
+  labs(
+    x = "Method",
+    y = "Number of clusters",
+    title = "Number of clusters by method and sample size (N)"
+  ) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none",
+    strip.text = element_text(size = 8)
+  )
 
 # Plot MSE values
 ggplot(all_results, aes(x = method, y = mse, fill = method)) +
@@ -121,8 +140,8 @@ tol12 <- c(
 method_colors <- setNames(tol12, method_levels)
 
 ## CLuster means density plot
-selected_prior <- c("right_confident", "right_diffuse", "uniform", 
-           "wrong_diffuse", "wrong_confident")[3]
+selected_prior <- c("none", "right_confident", "right_diffuse", "uniform", 
+           "wrong_diffuse", "wrong_confident")[1]
 
 df_long <- all_results %>%
   filter(prior == selected_prior) %>%

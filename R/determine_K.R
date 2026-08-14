@@ -11,7 +11,7 @@
 #'
 #' @return A list with `best_K` (integer), `waic_all` (named numeric vector),
 #'   and `best_fit` (the `.fit_model` result for the selected K)
-determine_K <- function(theta, sigma, num_null, num_junk, K_max = 5) {
+determine_K <- function(theta, sigma, num_null, num_junk, K_max) {
   J <- length(theta)
 
   fits <- lapply(1:K_max, function(k) {

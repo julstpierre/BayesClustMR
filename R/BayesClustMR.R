@@ -117,6 +117,7 @@
 #' @param num_null    1 if a null cluster is present, 0 otherwise
 #' @param num_junk    1 if a junk cluster is present, 0 otherwise
 #' @param df          Degrees of freedom for the junk distribution
+#' @param K_max       Maximum number of causal clusters to consider
 #'
 #' @return A list with `center_estimates`, `center_ci` (K x 2 matrix of 95% credible
 #'   intervals), and `waic`
@@ -125,7 +126,8 @@ BayesClustMR <- function(
     etas    = NULL,
     num_null = 0,
     num_junk = 0,
-    df = 4
+    df = 4,
+    K_max = 10
 ) {
   # Data preparation happens exactly once
   dat <- list(theta = by / bx, sigma = byse / abs(bx), J = length(by))
@@ -134,7 +136,8 @@ BayesClustMR <- function(
     K_result <- determine_K(
       dat$theta, dat$sigma,
       num_null = num_null,
-      num_junk = num_junk
+      num_junk = num_junk,
+      K_max = K_max
     )
     # determine_K already fitted the model for every K and kept the best result;
     return(K_result$best_fit)
