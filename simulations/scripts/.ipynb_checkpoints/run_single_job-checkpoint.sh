@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --output=../results/logs/%x_%j.out
 
-cd ~/projects/def-mlegault/gf591137/BayesClustMR/simulations/scripts/
+cd ~/links/projects/def-mlegault/gf591137/BayesClustMR/simulations/scripts/
 module load r/4.5.0
 
 echo "Running $1, prior=$4, chunks $2 to $3"

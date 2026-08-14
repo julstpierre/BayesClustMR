@@ -7,7 +7,7 @@
 #SBATCH --output=../results/logs/%x_%A_%a.out
 #SBATCH --array=0-599
 
-cd ~/projects/def-mlegault/gf591137/BayesClustMR/simulations/scripts/
+cd ~/links/projects/def-mlegault/gf591137/BayesClustMR/simulations/scripts/
 module load r/4.5.0
 
 SCENARIOS=("D_S1" "D_S2" "D_S3")
