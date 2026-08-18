@@ -19,6 +19,7 @@ source(here::here("simulations", "scripts", "fit_mrclust.R"))
 # -----------------------------
 args <- commandArgs(trailingOnly = TRUE)
 
+# args <- c("D_S1", "1", "2", "none")
 scenario <- args[1]               # e.g., "D_S1"
 start_idx     <- as.numeric(args[2])  # e.g., 1
 end_idx       <- as.numeric(args[3])  # e.g., 200

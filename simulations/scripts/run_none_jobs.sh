@@ -5,15 +5,15 @@
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=1
 #SBATCH --output=../results/logs/%x_%A_%a.out
-#SBATCH --array=0-119
+#SBATCH --array=0-299
 
 cd ~/links/projects/def-mlegault/gf591137/BayesClustMR/simulations/scripts/
 module load r/4.5.0
 
 SCENARIOS=("D_S1" "D_S2" "D_S3")
 PRIOR="none"
-N_CHUNKS=40
-CHUNK_SIZE=25
+N_CHUNKS=100
+CHUNK_SIZE=10
 N_SCENARIOS=${#SCENARIOS[@]}
 
 # Decompose SLURM_ARRAY_TASK_ID into scenario and chunk indices only
