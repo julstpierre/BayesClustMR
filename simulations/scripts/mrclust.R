@@ -462,10 +462,11 @@ mr_clust_em <- function (theta, theta_se, bx, by, bxse, byse, obs_names = NULL,
                          plot_results = list("best", min_pr = 0.5), trait_search = FALSE,
                          trait_pvalue = 1e-05, proxy_r2 = 0.8, catalogue = "GWAS",
                          proxies = "None", build = 37, cluster_sizes = 0:length(theta),
-                         k = NULL)
+                         k = NULL, k_max = NULL)
 {
   if (!is.null(k)) cluster_sizes <- k
-
+  if (!is.null(k_max)) cluster_sizes <- 0:k_max
+  
   init_clust_means <- NULL
   init_clust_probs <- NULL
   junk_mixture <- TRUE

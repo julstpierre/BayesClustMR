@@ -4,6 +4,7 @@
 fit_mr_clust <- function(sim, prior){
   
   k <- if (prior == "none") NULL else sim$K
+  k_max <- if (prior == "none") 10 else NULL
   
   ratios <- as.vector(sim$by / sim$bx)
   ratios.se <- sim$byse / abs(sim$bx)
@@ -14,7 +15,7 @@ fit_mr_clust <- function(sim, prior){
                         by = sim$by,
                         bxse = sim$bxse,
                         byse = sim$byse,
-                        k = k
+                        k = k, k_max = k_max
   )
   
   res_em_best <- res_em$results$best

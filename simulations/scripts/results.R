@@ -141,7 +141,7 @@ method_colors <- setNames(tol12, method_levels)
 
 ## CLuster means density plot
 selected_prior <- c("none", "right_confident", "right_diffuse", "uniform", 
-           "wrong_diffuse", "wrong_confident")[1]
+           "wrong_diffuse", "wrong_confident")[4]
 
 df_long <- all_results %>%
   filter(prior == selected_prior) %>%

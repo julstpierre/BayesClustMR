@@ -49,7 +49,7 @@ fit_BayesClustMR <- function(sim, prior) {
       num_null = num_null,
       num_junk = num_junk,
       df       = 4,
-      K_max = 10
+      K_max = 10 - num_null - num_junk
     )
   
   return(
